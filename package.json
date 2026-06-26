@@ -1,0 +1,12 @@
+{
+  "name": "bdi2-app",
+  "version": "1.0.0",
+  "description": "Local BDI-II self-report inventory with result history",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
