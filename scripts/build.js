@@ -1,0 +1,42 @@
+// Builds minified production assets from public/ into dist/.
+// Run with: npm run build
+const fs = require('fs');
+const path = require('path');
+const esbuild = require('esbuild');
+
+const SRC_DIR = path.join(__dirname, '..', 'public');
+const OUT_DIR = path.join(__dirname, '..', 'dist');
+
+fs.rmSync(OUT_DIR, { recursive: true, force: true });
+fs.mkdirSync(OUT_DIR, { recursive: true });
+
+async function build() {
+  await esbuild.build({
+    entryPoints: [path.join(SRC_DIR, 'questions.js')],
+    outfile: path.join(OUT_DIR, 'questions.js'),
+    minify: true,
+    bundle: false,
+    sourcemap: true,
+    target: 'es2018'
+  });
+
+  await esbuild.build({
+    entryPoints: [path.join(SRC_DIR, 'style.css')],
+    outfile: path.join(OUT_DIR, 'style.css'),
+    minify: true,
+    sourcemap: true
+  });
+
+  // HTML and other static files are copied as-is.
+  for (const file of fs.readdirSync(SRC_DIR)) {
+    if (file.endsWith('.js') || file.endsWith('.css')) continue;
+    fs.copyFileSync(path.join(SRC_DIR, file), path.join(OUT_DIR, file));
+  }
+
+  console.log(`Built production assets to ${path.relative(process.cwd(), OUT_DIR)}/`);
+}
+
+build().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

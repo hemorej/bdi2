@@ -15,8 +15,15 @@ if (!fs.existsSync(RESULTS_DIR)) {
   fs.mkdirSync(RESULTS_DIR, { recursive: true });
 }
 
+// Serve minified production assets from dist/ if they've been built
+// (npm run build), otherwise fall back to the raw files in public/.
+const DIST_DIR = path.join(__dirname, 'dist');
+const STATIC_DIR = fs.existsSync(DIST_DIR)
+  ? DIST_DIR
+  : path.join(__dirname, 'public');
+
 app.use(express.json({ limit: '256kb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(STATIC_DIR, { maxAge: '1d' }));
 
 // Save a completed quiz result as a JSON file in ./results/
 app.post('/api/results', (req, res) => {
