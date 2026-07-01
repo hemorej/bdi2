@@ -15,14 +15,14 @@
 }
 
 :root {
-  --bg: #f4f1ea;
+  --bg: #f1f2ec;
   --card: #ffffff;
-  --text: #2a2825;
-  --muted: #6b6862;
-  --border: #e7e1d6;
-  --accent: #4f7a8c;
-  --accent-hover: #3f6576;
-  --accent-soft: #e6eef1;
+  --text: #272a26;
+  --muted: #666b62;
+  --border: #e2e4d9;
+  --accent: #5f7d66;
+  --accent-hover: #4c6753;
+  --accent-soft: #e7ede6;
 
   --font-head: 'Newsreader', Georgia, serif;
   --font-body: 'Hanken Grotesque', system-ui, -apple-system, sans-serif;
@@ -117,6 +117,10 @@ body {
   font-size: 15px;
   line-height: 1.55;
   flex: 1;
+}
+
+.home-card .actions {
+  flex-direction: column;
 }
 
 .home-disclaimer {
