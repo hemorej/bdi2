@@ -27,10 +27,22 @@ async function build() {
     sourcemap: true
   });
 
-  // HTML and other static files are copied as-is.
+  // HTML and other static files/directories are copied as-is.
+  function copyRecursive(src, dest) {
+    const stat = fs.statSync(src);
+    if (stat.isDirectory()) {
+      fs.mkdirSync(dest, { recursive: true });
+      for (const entry of fs.readdirSync(src)) {
+        copyRecursive(path.join(src, entry), path.join(dest, entry));
+      }
+    } else {
+      fs.copyFileSync(src, dest);
+    }
+  }
+
   for (const file of fs.readdirSync(SRC_DIR)) {
     if (file.endsWith('.js') || file.endsWith('.css')) continue;
-    fs.copyFileSync(path.join(SRC_DIR, file), path.join(OUT_DIR, file));
+    copyRecursive(path.join(SRC_DIR, file), path.join(OUT_DIR, file));
   }
 
   console.log(`Built production assets to ${path.relative(process.cwd(), OUT_DIR)}/`);

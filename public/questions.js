@@ -194,10 +194,10 @@ const QUESTIONS = [
 // question 9 was omitted (60/63 ≈ 0.9524, rounded to integer cut-points).
 // Standard ranges: 0-13 minimal, 14-19 mild, 20-28 moderate, 29-63 severe.
 const SEVERITY_BANDS = [
-  { name: 'Minimal',  min: 0,  max: 12, color: '#3a9d5d' },
-  { name: 'Mild',     min: 13, max: 18, color: '#d8b13a' },
-  { name: 'Moderate', min: 19, max: 26, color: '#e07b3a' },
-  { name: 'Severe',   min: 27, max: 60, color: '#c0392b' }
+  { name: 'Minimal',  min: 0,  max: 12, color: '#5a9e73' },
+  { name: 'Mild',     min: 13, max: 18, color: '#d0a83a' },
+  { name: 'Moderate', min: 19, max: 26, color: '#d98040' },
+  { name: 'Severe',   min: 27, max: 60, color: '#c15a4e' }
 ];
 
 function severityFor(score) {
