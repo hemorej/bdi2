@@ -116,7 +116,8 @@ app.get('/api/results', (_req, res) => {
             file: f,
             takenAt: data.takenAt,
             totalScore: data.totalScore,
-            severity: data.severity
+            severity: data.severity,
+            note: data.note || null
           };
         } catch (e) {
           return null;

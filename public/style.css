@@ -478,10 +478,28 @@ button:disabled, .btn:disabled {
 }
 
 .chart-wrap {
+  position: relative;
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 18px 18px 8px;
   margin-bottom: 8px;
+}
+
+.note-tooltip {
+  display: none;
+  position: absolute;
+  background: var(--text);
+  color: var(--card);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  max-width: 220px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
 }
 
 /* ---------------------------------------------------------------------- */

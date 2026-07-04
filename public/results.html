@@ -28,6 +28,7 @@
 
       <div id="chart-wrap" class="chart-wrap" style="display:none">
         <svg id="chart" viewBox="0 0 720 240" width="100%" height="230" preserveAspectRatio="none"></svg>
+        <div id="note-tooltip" class="note-tooltip"></div>
       </div>
       <div class="legend" id="legend"></div>
 
@@ -48,7 +49,12 @@
 
   <script src="/questions.js"></script>
   <script>
-    const listEl  = document.getElementById('results-list');
+    const listEl      = document.getElementById('results-list');
+    const noteTooltip = document.getElementById('note-tooltip');
+
+    function escAttr(s) {
+      return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
     const subEl   = document.getElementById('subtitle');
     const empty   = document.getElementById('empty');
     const cta     = document.getElementById('cta');
@@ -145,9 +151,35 @@
             `<text x="${x.toFixed(1)}" y="${(padT + innerH + 18).toFixed(1)}" font-size="10" fill="#8a8178" text-anchor="middle" font-family="Hanken Grotesque, sans-serif">${label}</text>`
           );
         }
+
+        if (it.note) {
+          const nx = (x + 1).toFixed(1);
+          const ny = (y - 16).toFixed(1);
+          parts.push(
+            `<g class="note-icon" data-note="${escAttr(it.note)}" style="cursor:pointer">` +
+              `<circle cx="${nx}" cy="${ny}" r="7" fill="#5f7d66" stroke="white" stroke-width="1.5"/>` +
+              `<text x="${nx}" y="${ny}" font-size="9" fill="white" text-anchor="middle" dy="3.2" font-family="sans-serif" pointer-events="none">✎</text>` +
+            `</g>`
+          );
+        }
       });
 
       chart.innerHTML = parts.join('');
+
+      chart.querySelectorAll('.note-icon').forEach((icon) => {
+        icon.addEventListener('mouseenter', () => {
+          noteTooltip.textContent = icon.getAttribute('data-note');
+          noteTooltip.style.display = 'block';
+        });
+        icon.addEventListener('mousemove', (e) => {
+          const wrap = chartWrap.getBoundingClientRect();
+          noteTooltip.style.left = (e.clientX - wrap.left + 14) + 'px';
+          noteTooltip.style.top  = (e.clientY - wrap.top  - 12) + 'px';
+        });
+        icon.addEventListener('mouseleave', () => {
+          noteTooltip.style.display = 'none';
+        });
+      });
 
       // Legend
       legend.innerHTML = SEVERITY_BANDS.map(
