@@ -30,6 +30,21 @@ const loginLimiter = RateLimit({
   message: { error: 'Too many login attempts, please try again later.' }
 });
 
+function ensureCsrfToken(req) {
+  if (!req.session.csrfToken) {
+    req.session.csrfToken = crypto.randomBytes(32).toString('hex');
+  }
+  return req.session.csrfToken;
+}
+
+function validateCsrf(req, res, next) {
+  const token = req.headers['x-csrf-token'];
+  if (!token || !req.session.csrfToken || token !== req.session.csrfToken) {
+    return res.status(403).json({ error: 'Invalid CSRF token' });
+  }
+  next();
+}
+
 const CBT_SAFE_FILENAME = /^thought-record-[0-9A-Za-z\-]+\.json$/;
 
 function cbtSummarize(record) {
@@ -109,11 +124,15 @@ app.get('/api/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/login'));
 });
 
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ csrfToken: ensureCsrfToken(req) });
+});
+
 // ---------------------------------------------------------------------------
 // BDI-II routes
 // ---------------------------------------------------------------------------
 
-app.post('/api/results', async (req, res) => {
+app.post('/api/results', validateCsrf, async (req, res) => {
   const body = req.body || {};
   if (!Array.isArray(body.answers)) {
     return res.status(400).json({ error: 'answers array is required' });
@@ -181,7 +200,7 @@ app.get('/api/results/:id', async (req, res) => {
 // CBT routes
 // ---------------------------------------------------------------------------
 
-app.post('/api/cbt/submit', async (req, res) => {
+app.post('/api/cbt/submit', validateCsrf, async (req, res) => {
   const body = req.body || {};
   const now = new Date();
   const filename = `thought-record-${now.toISOString().replace(/[:.]/g, '-')}.json`;
