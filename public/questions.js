@@ -165,9 +165,9 @@ const QUESTIONS = [
     title: 'Weight changes',
     answers: [
       { score: 0, text: "I haven't lost much weight, if any, lately" },
-      { score: 1, text: 'I have lost more than five pounds' },
-      { score: 2, text: 'I have lost more than ten pounds' },
-      { score: 3, text: 'I have lost more than fifteen pounds' }
+      { score: 1, text: 'I have lost more than 2.3 kg' },
+      { score: 2, text: 'I have lost more than 4.5 kg' },
+      { score: 3, text: 'I have lost more than 6.8 kg' }
     ]
   },
   {

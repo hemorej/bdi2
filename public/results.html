@@ -199,6 +199,7 @@
         const li = document.createElement('li');
         li.innerHTML = `
           <span class="date">${fmtDate(it.takenAt)}</span>
+          ${it.note ? `<span class="note-flag" title="${escAttr(it.note)}">&#9998;</span>` : ''}
           <span class="severity-pill" style="background:${band.color}">${band.name}</span>
           <span class="score">${it.totalScore}/60</span>
         `;

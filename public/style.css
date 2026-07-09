@@ -431,6 +431,20 @@ button:disabled, .btn:disabled {
 .results-list li:last-child { border-bottom: none; }
 
 .results-list .date { flex: 1; font-size: 15px; }
+.results-list .note-flag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #5f7d66;
+  color: white;
+  font-size: 9px;
+  line-height: 1;
+  flex-shrink: 0;
+  cursor: default;
+}
 .results-list .score {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
