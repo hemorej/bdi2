@@ -12,6 +12,8 @@ const { initDb } = require('./migrate');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.disable('x-powered-by');
+
 // Trust the nginx reverse proxy so rate limiting uses the real client IP.
 app.set('trust proxy', 1);
 
