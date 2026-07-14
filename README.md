@@ -1,4 +1,4 @@
-# Self-care tools
+# Willow
 
 A small web app bundling two evidence-based self-report tools:
 
@@ -26,17 +26,17 @@ Results are stored in a PostgreSQL database. Access is protected by a login form
 pnpm install
 
 # 2. Create the database
-createdb bdi2
+createdb willow
 
 # 3. Copy and fill in the env template
 cp .env.template .env
 # Edit .env — set DATABASE_URL and SESSION_SECRET at minimum
 
 # 4. Create your login account (tables are created automatically on first run)
-DATABASE_URL=postgres://localhost/bdi2 pnpm run create-user
+DATABASE_URL=postgres://localhost/willow pnpm run create-user
 
 # 5. (Optional) Import any existing JSON result files
-DATABASE_URL=postgres://localhost/bdi2 pnpm run import
+DATABASE_URL=postgres://localhost/willow pnpm run import
 
 # 6. Start
 pnpm start
@@ -92,7 +92,7 @@ This is a self-tracking tool, not a clinical diagnosis. If you are in distress o
 ## File layout
 
 ```
-bdi2-app/
+willow/
 ├── package.json
 ├── pnpm-lock.yaml
 ├── .env.template          # copy to .env and fill in
@@ -124,7 +124,7 @@ Set `DATABASE_URL`, `SESSION_SECRET`, and `NODE_ENV=production` in Forge's envir
 After the first deploy, SSH in and run:
 
 ```bash
-cd /home/forge/bdi2.jerome-arfouche.ca/current
+cd /home/forge/willow.jerome-arfouche.ca/current
 DATABASE_URL=... pnpm run create-user
 DATABASE_URL=... pnpm run import   # only if migrating from the old file-based store
 ```

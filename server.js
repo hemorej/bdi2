@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -265,7 +267,7 @@ app.get('/api/cbt/entries/:filename', async (req, res) => {
 async function start() {
   await initDb();
   app.listen(PORT, () => {
-    console.log(`BDI-II app running at http://localhost:${PORT}`);
+    console.log(`willow app running at http://localhost:${PORT}`);
   });
 }
 

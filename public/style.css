@@ -49,8 +49,38 @@ body {
 /* Home                                                                    */
 /* ---------------------------------------------------------------------- */
 
-.home-intro {
-  margin-bottom: 40px;
+.home-wrap {
+  min-height: calc(100vh - 148px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.home-inner {
+  position: relative;
+}
+
+.home-bg-band {
+  position: absolute;
+  top: -46px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(980px, 100vw);
+  height: 210px;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url('/images/monstera-leaves.jpg');
+  background-repeat: repeat-x;
+  background-size: 320px auto;
+  background-position: center top;
+  opacity: .26;
+  filter: grayscale(1) sepia(.55) hue-rotate(60deg) saturate(1.7) brightness(1.5);
+  mix-blend-mode: multiply;
+}
+
+.home-content {
+  position: relative;
+  z-index: 1;
 }
 
 .home-eyebrow {
@@ -61,6 +91,34 @@ body {
   margin: 0 0 12px;
 }
 
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 34px;
+}
+
+.wordmark-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.wordmark-name {
+  font: 500 26px/1 var(--font-head);
+  color: var(--text);
+  letter-spacing: -.01em;
+}
+
+.home-intro {
+  margin-bottom: 40px;
+}
+
 .home-intro h1 {
   font: 500 40px/1.15 var(--font-head);
   margin: 0;
@@ -68,18 +126,19 @@ body {
   letter-spacing: -.01em;
 }
 
-.home-intro p {
-  margin: 16px 0 0;
-  color: var(--muted);
-  font-size: 17px;
-  line-height: 1.55;
-  max-width: 56ch;
+.home-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  width: min(1040px, 92vw);
+  margin-left: 50%;
+  transform: translateX(-50%);
 }
 
-.home-cards {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
+@media (max-width: 900px) {
+  .home-cards {
+    grid-template-columns: 1fr;
+  }
 }
 
 .home-card {
@@ -90,8 +149,7 @@ body {
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-width: 280px;
+  min-width: 0;
 }
 
 .home-card-icon {
@@ -106,21 +164,32 @@ body {
 }
 
 .home-card h2 {
-  font: 500 23px/1.25 var(--font-head);
-  margin: 0 0 8px;
+  font: 500 21px/1.25 var(--font-head);
+  margin: 0;
   color: var(--text);
-}
-
-.home-card p {
-  margin: 0 0 22px;
-  color: var(--muted);
-  font-size: 15px;
-  line-height: 1.55;
-  flex: 1;
+  white-space: nowrap;
 }
 
 .home-card .actions {
-  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 22px;
+  flex-wrap: nowrap;
+}
+
+.home-card .actions .btn {
+  flex: 1;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0;
+}
+
+.home-card .actions .btn.icon-only {
+  flex: 0 0 44px;
+  width: 44px;
 }
 
 .home-disclaimer {

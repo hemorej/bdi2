@@ -3,54 +3,80 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Self-care tools</title>
+  <title>Willow</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="apple-touch-icon" href="/favicon.svg" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
   <div class="container">
-    <div class="home-intro">
-      <p class="home-eyebrow">Self-care tools</p>
-      <h1>A quiet place to check in with yourself.</h1>
-      <p>Two evidence-based exercises, kept private on your own computer. Take a
-        measure of how you're doing, or work through a difficult thought — at
-        your own pace.</p>
-    </div>
-
-    <div class="home-cards">
-      <div class="home-card">
-        <div class="home-card-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg>
-        </div>
-        <h2>Beck Depression Inventory</h2>
-        <p>A 20-item self-report check-in. Pick the statement that best fits how
-          you've felt over the past two weeks, and track your score over time.</p>
-        <div class="actions">
-          <a class="btn" href="/quiz.html">Start a new test</a>
-          <a class="btn secondary" href="/results.html">View past results</a>
-        </div>
+    <div class="home-wrap">
+      <div class="home-inner">
+      <div class="home-bg-band" aria-hidden="true"></div>
+      <div class="home-content">
+      <div class="wordmark">
+        <span class="wordmark-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c0-7 3-13 11-16-1 8-4 13-11 16z"/><path d="M8.5 15.5C11 13 13 9.5 15 4"/></svg>
+        </span>
+        <span class="wordmark-name">Willow</span>
       </div>
 
-      <div class="home-card">
-        <div class="home-card-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      <div class="home-intro">
+        <h1>A quiet place to check in with yourself.</h1>
+      </div>
+
+      <div class="home-cards">
+        <div class="home-card">
+          <div class="home-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-4 3 3 4-6"/></svg>
+          </div>
+          <h2>Beck Depression Inventory</h2>
+          <div class="actions">
+            <a class="btn" href="/quiz.html" title="New test" aria-label="New test">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New
+            </a>
+            <a class="btn secondary icon-only" href="/results.html" title="View past results" aria-label="View past results">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+            </a>
+          </div>
         </div>
-        <h2>CBT Thought Record</h2>
-        <p>A short, guided cognitive-behavioral exercise for working through a
-          difficult thought or situation, one gentle step at a time.</p>
-        <div class="actions">
-          <a class="btn" href="/cbt.html">Start a record</a>
-          <a class="btn secondary" href="/cbt.html#list">View past entries</a>
+
+        <div class="home-card">
+          <div class="home-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          </div>
+          <h2>CBT Thought Record</h2>
+          <div class="actions">
+            <a class="btn" href="/cbt.html" title="New thought record" aria-label="New thought record">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New
+            </a>
+            <a class="btn secondary icon-only" href="/cbt.html#list" title="View past entries" aria-label="View past entries">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="home-card">
+          <div class="home-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19a1 1 0 0 1 1 1v14.5"/><path d="M6.5 17H20a1 1 0 0 1 0 2H6.5A2.5 2.5 0 0 1 4 16.5v-11"/><path d="M9 8h7"/><path d="M9 11.5h5"/></svg>
+          </div>
+          <h2>Journal &amp; Mood</h2>
+          <div class="actions">
+            <a class="btn" href="/journal.html" title="Write an entry" aria-label="Write an entry">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New
+            </a>
+            <a class="btn secondary icon-only" href="/journal.html" title="View journal" aria-label="View journal">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+            </a>
+          </div>
         </div>
       </div>
+      </div>
+      </div>
     </div>
-
-    <p class="home-disclaimer">
-      These tools are for reflection and self-tracking — not a clinical
-      diagnosis. If you're in distress or having thoughts of self-harm, please
-      reach out to a qualified professional or a local crisis service.
-    </p>
   </div>
   <nav class="auth-bar"><a href="/api/logout">Sign out</a></nav>
 </body>

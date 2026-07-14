@@ -1,11 +1,10 @@
 {
-    "name": "bdi2-app",
+    "name": "willow-app",
     "version": "1.0.0",
     "description": "Local BDI-II self-report inventory with result history",
     "main": "server.js",
     "packageManager": "pnpm@11.9.0",
-    "scripts":
-    {
+    "scripts": {
         "dev": "brew services start postgresql@18; node server.js",
         "start": "node server.js",
         "stop": "brew services stop postgresql@18",
@@ -13,17 +12,16 @@
         "create-user": "node scripts/create-user.js",
         "import": "node scripts/import.js"
     },
-    "dependencies":
-    {
+    "dependencies": {
         "bcryptjs": "^3.0.3",
         "connect-pg-simple": "^10.0.0",
+        "dotenv": "^17.4.2",
         "express": "^4.22.2",
         "express-rate-limit": "^8.5.2",
         "express-session": "^1.19.0",
         "pg": "^8.22.0"
     },
-    "devDependencies":
-    {
+    "devDependencies": {
         "esbuild": "^0.28.1"
     }
 }
