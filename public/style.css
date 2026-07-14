@@ -161,6 +161,30 @@ body {
   color: var(--accent);
 }
 
+@media (max-width: 560px) {
+  .top-bar {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
+  .top-bar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .nav-cluster {
+    flex-wrap: wrap;
+  }
+
+  .nav-pill {
+    padding: 7px 10px;
+  }
+
+  .nav-pill-label {
+    display: none;
+  }
+}
+
 /* ---------------------------------------------------------------------- */
 /* Journal home — writing surface                                         */
 /* ---------------------------------------------------------------------- */
