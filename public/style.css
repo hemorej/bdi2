@@ -273,6 +273,10 @@ body {
   padding: 0;
 }
 
+.journal-textarea:focus {
+  outline: none;
+}
+
 .journal-textarea::placeholder {
   color: #a9aaa0;
 }
