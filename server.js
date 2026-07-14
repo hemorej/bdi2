@@ -50,6 +50,7 @@ function validateCsrf(req, res, next) {
 }
 
 const CBT_SAFE_FILENAME = /^thought-record-[0-9A-Za-z\-]+\.json$/;
+const BDI_SAFE_ID = /^bdi2-[0-9A-Za-z\-]+$/;
 
 function cbtSummarize(record) {
   const candidates = [record.situation, record.automaticThought, record.adaptiveResponse];
@@ -192,7 +193,10 @@ app.get('/api/results', async (_req, res) => {
 });
 
 app.get('/api/results/:id', async (req, res) => {
-  const id = req.params.id.replace(/[^a-zA-Z0-9_\-]/g, '');
+  const { id } = req.params;
+  if (!BDI_SAFE_ID.test(id)) {
+    return res.status(400).json({ error: 'Invalid id' });
+  }
   try {
     const { rows } = await pool.query('SELECT data FROM bdi_results WHERE id = $1', [id]);
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
