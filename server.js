@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 const express = require('express');
 const fs = require('fs');
@@ -257,6 +257,56 @@ app.get('/api/cbt/entries/:filename', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ ok: false, error: 'Failed to read entry' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Journal routes
+// ---------------------------------------------------------------------------
+
+const JOURNAL_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+app.post('/api/journal/entries', validateCsrf, async (req, res) => {
+  const body = req.body || {};
+  const text = typeof body.text === 'string' ? body.text.trim() : '';
+  const mood = Number.isInteger(body.mood) && body.mood >= 0 && body.mood <= 4 ? body.mood : null;
+  const date = typeof body.date === 'string' && JOURNAL_DATE.test(body.date) ? body.date : null;
+
+  if (!date) return res.status(400).json({ error: 'A valid date (YYYY-MM-DD) is required' });
+  if (!text && mood === null) return res.status(400).json({ error: 'Write something or pick a mood' });
+
+  const order = Date.now();
+  const id = `journal-${order}-${crypto.randomBytes(4).toString('hex')}`;
+  const record = { id, date, order, text: text || null, mood };
+
+  try {
+    await pool.query(
+      'INSERT INTO journal_entries (id, entry_date, entry_order, mood, body, data) VALUES ($1, $2, $3, $4, $5, $6)',
+      [id, date, order, mood, text || null, record]
+    );
+    res.json({ ok: true, entry: record });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to save entry' });
+  }
+});
+
+app.get('/api/journal/entries', async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, entry_date, entry_order, mood, body FROM journal_entries ORDER BY entry_date DESC, entry_order DESC'
+    );
+    const entries = rows.map((r) => ({
+      id: r.id,
+      date: r.entry_date.toISOString().slice(0, 10),
+      order: Number(r.entry_order),
+      text: r.body,
+      mood: r.mood
+    }));
+    res.json({ ok: true, entries });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: 'Failed to read entries' });
   }
 });
 
