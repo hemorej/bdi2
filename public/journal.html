@@ -130,19 +130,12 @@
 
         const month = document.createElement('p');
         month.className = 'day-month';
-        month.textContent = d.toLocaleDateString(undefined, { month: 'short' });
+        month.textContent = d.toLocaleDateString(undefined, { month: 'short' })
+          + (d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '');
 
         dateInner.appendChild(weekday);
         dateInner.appendChild(dayNum);
         dateInner.appendChild(month);
-
-        if (d.getFullYear() !== new Date().getFullYear()) {
-          const year = document.createElement('p');
-          year.className = 'day-year';
-          year.textContent = String(d.getFullYear());
-          dateInner.appendChild(year);
-        }
-
         dateCol.appendChild(dateInner);
 
         const entriesCol = document.createElement('div');

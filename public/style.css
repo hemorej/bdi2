@@ -378,12 +378,6 @@ body {
   margin: 0;
 }
 
-.day-year {
-  font: 500 12px var(--font-body);
-  color: var(--muted);
-  margin: 2px 0 0;
-}
-
 .day-entries {
   flex: 1;
   display: flex;
