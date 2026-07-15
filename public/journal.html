@@ -60,6 +60,73 @@
   <script src="/moods.js"></script>
   <script src="/gratitude.js"></script>
   <script>
+    let _csrfToken = null;
+    async function getCsrfToken() {
+      if (!_csrfToken) {
+        const r = await fetch('/api/csrf-token');
+        const d = await r.json();
+        _csrfToken = d.csrfToken;
+      }
+      return _csrfToken;
+    }
+
+    function autoResize(textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    function startEdit(bubble, textEl, entry) {
+      if (bubble.classList.contains('editing')) return;
+      bubble.classList.add('editing');
+
+      const textarea = document.createElement('textarea');
+      textarea.className = 'entry-edit-textarea';
+      textarea.value = entry.text;
+      textEl.replaceWith(textarea);
+      autoResize(textarea);
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+      textarea.addEventListener('input', () => autoResize(textarea));
+
+      let finished = false;
+      async function finish(save) {
+        if (finished) return;
+        finished = true;
+        bubble.classList.remove('editing');
+
+        const newText = textarea.value.trim();
+        if (save && newText && newText !== entry.text) {
+          textEl.textContent = newText;
+          textarea.replaceWith(textEl);
+          try {
+            await fetch(`/api/journal/entries/${encodeURIComponent(entry.id)}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': await getCsrfToken() },
+              body: JSON.stringify({ text: newText }),
+            });
+            entry.text = newText;
+          } catch (err) {
+            console.error('update failed', err);
+            textEl.textContent = entry.text;
+          }
+        } else {
+          textEl.textContent = entry.text;
+          textarea.replaceWith(textEl);
+        }
+      }
+
+      textarea.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' && !ev.shiftKey) {
+          ev.preventDefault();
+          finish(true);
+        } else if (ev.key === 'Escape') {
+          ev.preventDefault();
+          finish(false);
+        }
+      });
+      textarea.addEventListener('blur', () => finish(true));
+    }
+
     function localDateFromISO(iso) {
       const [y, m, d] = iso.split('-').map(Number);
       return new Date(y, m - 1, d);
@@ -176,7 +243,10 @@
             }
 
             const textEl = document.createElement('div');
+            textEl.className = 'entry-text';
             textEl.textContent = e.text;
+            textEl.tabIndex = 0;
+            textEl.addEventListener('click', () => startEdit(bubble, textEl, e));
             bubble.appendChild(textEl);
 
             entryRow.appendChild(bubble);

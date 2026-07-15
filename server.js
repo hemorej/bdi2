@@ -337,6 +337,25 @@ app.get('/api/journal/entries', async (_req, res) => {
   }
 });
 
+app.patch('/api/journal/entries/:id', validateCsrf, async (req, res) => {
+  const { id } = req.params;
+  const body = req.body || {};
+  const text = typeof body.text === 'string' ? body.text.trim() : '';
+  if (!text) return res.status(400).json({ error: 'Text cannot be empty' });
+
+  try {
+    const { rows } = await pool.query('SELECT data FROM journal_entries WHERE id = $1', [id]);
+    if (!rows.length) return res.status(404).json({ error: 'Entry not found' });
+
+    const data = { ...rows[0].data, text };
+    await pool.query('UPDATE journal_entries SET body = $1, data = $2 WHERE id = $3', [text, data, id]);
+    res.json({ ok: true, text });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update entry' });
+  }
+});
+
 // ---------------------------------------------------------------------------
 // Start
 // ---------------------------------------------------------------------------
