@@ -20,6 +20,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c0-7 3-13 11-16-1 8-4 13-11 16z"/><path d="M8.5 15.5C11 13 13 9.5 15 4"/></svg>
       </span>
       <span class="wordmark-name">Willow</span>
+      <span class="wordmark-section">— CBT</span>
     </a>
     <div class="top-bar-right">
       <nav class="nav-cluster">
@@ -360,11 +361,7 @@ function renderHeader() {
     backLink.textContent = "← Home";
   }
 
-  const h1 = document.createElement("h1");
-  h1.textContent = "Thought Record";
-
   titleBlock.appendChild(backLink);
-  titleBlock.appendChild(h1);
 
   if (state.view === "list") {
     const sub = document.createElement("p");

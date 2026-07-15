@@ -79,6 +79,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  color: var(--text);
   text-decoration: none;
 }
 
@@ -94,9 +95,14 @@ body {
 }
 
 .wordmark-name {
-  font: 500 22px/1 var(--font-head);
+  font: 500 26px/1 var(--font-head);
   color: var(--text);
   letter-spacing: -.01em;
+}
+
+.wordmark-section {
+  font: 500 15px/1 var(--font-body);
+  color: var(--muted);
 }
 
 .top-bar-right {
@@ -155,6 +161,20 @@ body {
   }
 
   .nav-pill-label {
+    display: none;
+  }
+
+  .wordmark-name {
+    font-size: 21px;
+  }
+
+  .wordmark-section {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 400px) {
+  .wordmark-section {
     display: none;
   }
 }
@@ -487,13 +507,6 @@ header.app-header {
 }
 
 .title-block { min-width: 0; }
-
-.title-block h1 {
-  font: 500 27px/1.2 var(--font-head);
-  margin: 8px 0 0;
-  color: var(--text);
-  letter-spacing: -.01em;
-}
 
 .title-block .subtitle {
   margin: 8px 0 0;
