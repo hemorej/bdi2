@@ -44,6 +44,7 @@
       <div class="title-block">
         <a class="text-link" href="/">← Home</a>
       </div>
+      <button class="gratitude-filter-toggle" id="gratitude-filter-toggle" type="button" aria-pressed="false" title="Show gratitude entries only"></button>
     </div>
 
     <div id="log-body">
@@ -269,23 +270,47 @@
     const PER_PAGE = 10;
     let allEntries = [];
     let page = 0;
+    let gratitudeOnly = false;
 
     const pager = document.getElementById('pager');
     const pagerLabel = document.getElementById('pager-label');
     const pagerPrev = document.getElementById('pager-prev');
     const pagerNext = document.getElementById('pager-next');
 
+    const gratitudeFilterToggle = document.getElementById('gratitude-filter-toggle');
+    gratitudeFilterToggle.innerHTML = sproutSvg(16);
+    gratitudeFilterToggle.addEventListener('click', () => {
+      gratitudeOnly = !gratitudeOnly;
+      gratitudeFilterToggle.classList.toggle('on', gratitudeOnly);
+      gratitudeFilterToggle.setAttribute('aria-pressed', String(gratitudeOnly));
+      gratitudeFilterToggle.title = gratitudeOnly ? 'Show all entries' : 'Show gratitude entries only';
+      page = 0;
+      renderPage();
+    });
+
     function renderPage() {
-      const totalPages = Math.max(1, Math.ceil(allEntries.length / PER_PAGE));
+      const filtered = gratitudeOnly ? allEntries.filter((e) => e.gratitude) : allEntries;
+      const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
       page = Math.min(page, totalPages - 1);
       const start = page * PER_PAGE;
-      const pageItems = allEntries.slice(start, start + PER_PAGE);
+      const pageItems = filtered.slice(start, start + PER_PAGE);
 
-      renderEntries(pageItems);
+      if (!filtered.length && gratitudeOnly) {
+        const body = document.getElementById('log-body');
+        body.innerHTML = '';
+        const wrap = document.createElement('div');
+        wrap.className = 'log-empty';
+        const p = document.createElement('p');
+        p.textContent = 'No gratitude entries yet.';
+        wrap.appendChild(p);
+        body.appendChild(wrap);
+      } else {
+        renderEntries(pageItems);
+      }
 
       if (totalPages > 1) {
         pager.style.display = '';
-        pagerLabel.textContent = `${start + 1}–${start + pageItems.length} of ${allEntries.length}`;
+        pagerLabel.textContent = `${start + 1}–${start + pageItems.length} of ${filtered.length}`;
         pagerPrev.disabled = page === 0;
         pagerNext.disabled = page >= totalPages - 1;
       } else {

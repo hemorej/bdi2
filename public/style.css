@@ -335,6 +335,37 @@ body {
   flex-wrap: wrap;
 }
 
+.gratitude-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.gratitude-filter-toggle svg {
+  display: block;
+}
+
+.gratitude-filter-toggle:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.gratitude-filter-toggle.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
 .day-group {
   display: flex;
   gap: 26px;
