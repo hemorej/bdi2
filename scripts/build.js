@@ -17,7 +17,9 @@ async function build() {
       path.join(SRC_DIR, 'questions.js'),
       path.join(SRC_DIR, 'moods.js'),
       path.join(SRC_DIR, 'gratitude.js'),
-      path.join(SRC_DIR, 'theme.js')
+      path.join(SRC_DIR, 'theme.js'),
+      path.join(SRC_DIR, 'push.js'),
+      path.join(SRC_DIR, 'sw.js')
     ],
     outdir: OUT_DIR,
     minify: true,
