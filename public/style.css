@@ -141,6 +141,51 @@ body {
   color: var(--accent);
 }
 
+.push-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.push-toggle svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.push-toggle.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* Bare <button>; neutralize the global button:hover fill (see .mood-btn). */
+.push-toggle:hover {
+  background: var(--card);
+}
+
+.push-toggle.is-active:hover {
+  background: var(--accent-soft);
+}
+
+.push-toggle-label {
+  /* Visually hidden — used for the accessible name / title only. */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
 @media (max-width: 560px) {
   .top-bar-right {
     margin-right: 46px;

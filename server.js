@@ -8,6 +8,7 @@ const session = require('express-session');
 const PgSession = require('connect-pg-simple')(session);
 const bcrypt = require('bcryptjs');
 const RateLimit = require('express-rate-limit');
+const webpush = require('web-push');
 const pool = require('./db');
 const { initDb } = require('./migrate');
 
@@ -67,6 +68,54 @@ if (!process.env.SESSION_SECRET) {
   console.warn('SESSION_SECRET not set — sessions will not survive restarts');
 }
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+
+// ---------------------------------------------------------------------------
+// Web Push (daily reminder)
+// ---------------------------------------------------------------------------
+
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY || '';
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || '';
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || '';
+const PUSH_ENABLED = Boolean(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_SUBJECT);
+
+if (PUSH_ENABLED) {
+  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+} else {
+  console.warn('VAPID keys not set — push reminders are disabled');
+}
+
+// Push subscription endpoints are URLs the server will POST to unattended,
+// once a day, forever. Restrict them to the known browser push vendors so a
+// hijacked/malformed subscription can't be used to make the server send
+// arbitrary outbound requests (SSRF).
+const ALLOWED_PUSH_HOSTS = [
+  /(^|\.)fcm\.googleapis\.com$/,          // Chrome, Edge, Android
+  /(^|\.)updates\.push\.services\.mozilla\.com$/, // Firefox
+  /(^|\.)push\.apple\.com$/               // Safari / iOS
+];
+
+function isSafeSubscription(sub) {
+  if (!sub || typeof sub.endpoint !== 'string') return false;
+  let url;
+  try {
+    url = new URL(sub.endpoint);
+  } catch {
+    return false;
+  }
+  if (url.protocol !== 'https:') return false;
+  if (!ALLOWED_PUSH_HOSTS.some((re) => re.test(url.hostname))) return false;
+  const keys = sub.keys || {};
+  const B64URL = /^[A-Za-z0-9_-]+$/;
+  if (typeof keys.p256dh !== 'string' || keys.p256dh.length > 200 || !B64URL.test(keys.p256dh)) return false;
+  if (typeof keys.auth !== 'string' || keys.auth.length > 100 || !B64URL.test(keys.auth)) return false;
+  return true;
+}
+
+// Reminder fires once daily at this server-local time (24h "HH:MM").
+// Set the standard TZ env var if the server isn't already in your timezone.
+const REMINDER_TIME = process.env.REMINDER_TIME || '20:00';
+const REMINDER_MATCH = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(REMINDER_TIME);
+if (!REMINDER_MATCH) console.warn(`REMINDER_TIME "${REMINDER_TIME}" is invalid — expected "HH:MM"`);
 
 app.use(express.json({ limit: '256kb' }));
 app.use(express.urlencoded({ extended: false }));
@@ -357,11 +406,118 @@ app.patch('/api/journal/entries/:id', validateCsrf, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// Push routes (daily reminder)
+// ---------------------------------------------------------------------------
+
+app.get('/api/push/public-key', (_req, res) => {
+  if (!PUSH_ENABLED) return res.status(503).json({ error: 'Push is not configured' });
+  res.json({ publicKey: VAPID_PUBLIC_KEY });
+});
+
+app.post('/api/push/subscribe', validateCsrf, async (req, res) => {
+  if (!PUSH_ENABLED) return res.status(503).json({ error: 'Push is not configured' });
+  const sub = req.body || {};
+  if (!isSafeSubscription(sub)) return res.status(400).json({ error: 'Invalid subscription' });
+
+  try {
+    await pool.query(
+      `INSERT INTO push_subscriptions (endpoint, p256dh, auth) VALUES ($1, $2, $3)
+       ON CONFLICT (endpoint) DO UPDATE SET p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth`,
+      [sub.endpoint, sub.keys.p256dh, sub.keys.auth]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to save subscription' });
+  }
+});
+
+app.post('/api/push/unsubscribe', validateCsrf, async (req, res) => {
+  const endpoint = req.body && req.body.endpoint;
+  if (typeof endpoint !== 'string' || !endpoint) return res.status(400).json({ error: 'endpoint is required' });
+  try {
+    await pool.query('DELETE FROM push_subscriptions WHERE endpoint = $1', [endpoint]);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to remove subscription' });
+  }
+});
+
+// Sends today's reminder immediately, bypassing the schedule — a way to test
+// end-to-end delivery without waiting for REMINDER_TIME. Same auth+CSRF
+// gate as every other mutating route; not a public/unauthenticated endpoint.
+app.post('/api/push/test', validateCsrf, async (_req, res) => {
+  if (!PUSH_ENABLED) return res.status(503).json({ error: 'Push is not configured' });
+  try {
+    await sendDailyReminders();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to send test notification' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Daily reminder scheduler
+// ---------------------------------------------------------------------------
+
+async function sendDailyReminders() {
+  const { rows } = await pool.query('SELECT id, endpoint, p256dh, auth FROM push_subscriptions');
+  const payload = JSON.stringify({ title: 'Willow', body: 'Take a moment to check in with yourself today.' });
+
+  for (const row of rows) {
+    const subscription = { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } };
+    try {
+      const result = await webpush.sendNotification(subscription, payload);
+      console.log(`Push sent to subscription ${row.id}: ${result.statusCode} ${JSON.stringify(row.endpoint)}`);
+    } catch (err) {
+      if (err.statusCode === 404 || err.statusCode === 410) {
+        // Subscription expired or was revoked on the client — stop targeting it.
+        await pool.query('DELETE FROM push_subscriptions WHERE id = $1', [row.id]);
+      } else {
+        console.error('Push send failed:', err.statusCode || err.message);
+      }
+    }
+  }
+}
+
+function msUntilNext(hour, minute) {
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  return next.getTime() - now.getTime();
+}
+
+function scheduleDailyReminder() {
+  if (!PUSH_ENABLED || !REMINDER_MATCH) return;
+  const hour = Number(REMINDER_MATCH[1]);
+  const minute = Number(REMINDER_MATCH[2]);
+
+  function scheduleNext() {
+    // Recomputed on every firing (rather than a fixed 24h interval) so the
+    // schedule self-corrects across DST changes and any clock drift.
+    setTimeout(async () => {
+      try {
+        await sendDailyReminders();
+      } catch (err) {
+        console.error('Daily reminder run failed:', err);
+      }
+      scheduleNext();
+    }, msUntilNext(hour, minute));
+  }
+
+  scheduleNext();
+  console.log(`Daily push reminder scheduled for ${REMINDER_TIME} (server local time)`);
+}
+
+// ---------------------------------------------------------------------------
 // Start
 // ---------------------------------------------------------------------------
 
 async function start() {
   await initDb();
+  scheduleDailyReminder();
   app.listen(PORT, () => {
     console.log(`willow app running at http://localhost:${PORT}`);
   });
