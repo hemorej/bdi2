@@ -11,6 +11,7 @@ const RateLimit = require('express-rate-limit');
 const webpush = require('web-push');
 const pool = require('./db');
 const { initDb } = require('./migrate');
+const journalCrypto = require('./lib/journal-crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -356,7 +357,7 @@ app.post('/api/journal/entries', validateCsrf, async (req, res) => {
   try {
     await pool.query(
       'INSERT INTO journal_entries (id, entry_date, entry_order, mood, body, gratitude, gratitude_tag, data) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-      [id, date, order, mood, text || null, gratitude, gratitudeTag, record]
+      [id, date, order, mood, journalCrypto.encryptText(text || null), gratitude, gratitudeTag, journalCrypto.encryptJSON(record)]
     );
     res.json({ ok: true, entry: record });
   } catch (err) {
@@ -374,7 +375,7 @@ app.get('/api/journal/entries', async (_req, res) => {
       id: r.id,
       date: r.entry_date.toISOString().slice(0, 10),
       order: Number(r.entry_order),
-      text: r.body,
+      text: journalCrypto.decryptText(r.body),
       mood: r.mood,
       gratitude: r.gratitude,
       gratitudeTag: r.gratitude_tag
@@ -396,8 +397,11 @@ app.patch('/api/journal/entries/:id', validateCsrf, async (req, res) => {
     const { rows } = await pool.query('SELECT data FROM journal_entries WHERE id = $1', [id]);
     if (!rows.length) return res.status(404).json({ error: 'Entry not found' });
 
-    const data = { ...rows[0].data, text };
-    await pool.query('UPDATE journal_entries SET body = $1, data = $2 WHERE id = $3', [text, data, id]);
+    const data = { ...journalCrypto.decryptJSON(rows[0].data), text };
+    await pool.query(
+      'UPDATE journal_entries SET body = $1, data = $2 WHERE id = $3',
+      [journalCrypto.encryptText(text), journalCrypto.encryptJSON(data), id]
+    );
     res.json({ ok: true, text });
   } catch (err) {
     console.error(err);
