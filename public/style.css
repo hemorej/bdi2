@@ -367,6 +367,70 @@ body {
   justify-content: center;
 }
 
+.followup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.followup-overlay[hidden] {
+  display: none;
+}
+
+.followup-modal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .18);
+}
+
+.followup-eyebrow {
+  font: 600 12px var(--font-body);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 10px;
+}
+
+.followup-question {
+  font: 500 20px/1.35 var(--font-head);
+  color: var(--text);
+  margin: 0 0 14px;
+}
+
+.followup-textarea {
+  display: block;
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font: 400 15px/1.5 var(--font-body);
+  padding: 10px 12px;
+  margin: 0 0 16px;
+}
+
+.followup-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.followup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 /* ---------------------------------------------------------------------- */
 /* Journal log — entry feed                                               */
 /* ---------------------------------------------------------------------- */

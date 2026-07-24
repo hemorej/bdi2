@@ -345,6 +345,10 @@ app.post('/api/journal/entries', validateCsrf, async (req, res) => {
   const gratitudeTag = gratitude && typeof body.gratitudeTag === 'string' && GRATITUDE_TAGS.has(body.gratitudeTag)
     ? body.gratitudeTag
     : null;
+  const followupId = Number.isInteger(body.followupId) ? body.followupId : null;
+  const followupAnswer = typeof body.followupAnswer === 'string' && body.followupAnswer.trim()
+    ? body.followupAnswer.trim()
+    : null;
 
   if (!date) return res.status(400).json({ error: 'A valid date (YYYY-MM-DD) is required' });
   if (!text && mood === null) return res.status(400).json({ error: 'Write something or pick a mood' });
@@ -358,10 +362,89 @@ app.post('/api/journal/entries', validateCsrf, async (req, res) => {
       'INSERT INTO journal_entries (id, entry_date, entry_order, mood, body, gratitude, gratitude_tag, data) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
       [id, date, order, mood, text || null, gratitude, gratitudeTag, record]
     );
+
+    if (followupId !== null) {
+      await pool.query(
+        'UPDATE journal_followups SET entry_id = $1, answer = $2 WHERE id = $3 AND entry_id IS NULL',
+        [id, followupAnswer, followupId]
+      );
+    }
+
     res.json({ ok: true, entry: record });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to save entry' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Reflective followup prompts (self-compassion / ACT values)
+// ---------------------------------------------------------------------------
+//
+// Shown occasionally on non-gratitude entries: never more than once a day,
+// and forced on if a week has passed without one, otherwise a ~25% chance
+// each time the compose view is saved. journal_followups logs every time
+// the prompt is shown (regardless of whether it's answered) so eligibility
+// can be computed from the last shown_date.
+
+const FOLLOWUP_MIN_GAP_DAYS = 7;
+const FOLLOWUP_CHANCE = 0.25;
+
+const FOLLOWUP_QUESTIONS = {
+  self_compassion: [
+    'How can you show yourself kindness in this moment?',
+    'What would you say to a friend who felt this way?',
+    'What do you need to hear right now?',
+    "Where can you offer yourself a little softness today?",
+    "What's one way you could be gentler with yourself?",
+    "What's something you're being hard on yourself about that you could set down?"
+  ],
+  act_values: [
+    'What matters most to you in this moment?',
+    'What small step today moved you toward the person you want to be?',
+    'Which of your values felt most alive today?',
+    'What would acting on your values look like right now, even if it feels uncomfortable?',
+    'What can you make room for today, even alongside difficult feelings?',
+    "What's something you did today that felt aligned with who you want to be?"
+  ]
+};
+
+const FOLLOWUP_THEMES = Object.keys(FOLLOWUP_QUESTIONS);
+
+app.post('/api/journal/followup-check', validateCsrf, async (req, res) => {
+  const date = typeof req.body?.date === 'string' && JOURNAL_DATE.test(req.body.date) ? req.body.date : null;
+  if (!date) return res.status(400).json({ error: 'A valid date (YYYY-MM-DD) is required' });
+
+  try {
+    const { rows } = await pool.query(
+      'SELECT shown_date::text AS shown_date FROM journal_followups ORDER BY shown_date DESC LIMIT 1'
+    );
+    const lastShown = rows[0]?.shown_date || null;
+
+    if (lastShown === date) {
+      return res.json({ show: false });
+    }
+
+    const daysSince = lastShown
+      ? Math.floor((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${lastShown}T00:00:00Z`)) / 86400000)
+      : Infinity;
+
+    const show = daysSince >= FOLLOWUP_MIN_GAP_DAYS || Math.random() < FOLLOWUP_CHANCE;
+    if (!show) return res.json({ show: false });
+
+    const theme = FOLLOWUP_THEMES[Math.floor(Math.random() * FOLLOWUP_THEMES.length)];
+    const questions = FOLLOWUP_QUESTIONS[theme];
+    const question = questions[Math.floor(Math.random() * questions.length)];
+
+    const { rows: inserted } = await pool.query(
+      'INSERT INTO journal_followups (shown_date, theme, question) VALUES ($1, $2, $3) RETURNING id',
+      [date, theme, question]
+    );
+
+    res.json({ show: true, id: inserted[0].id, theme, question });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to check followup eligibility' });
   }
 });
 

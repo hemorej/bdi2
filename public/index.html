@@ -68,6 +68,18 @@
     </div>
   </div>
 
+  <div class="followup-overlay" id="followup-overlay" hidden>
+    <div class="followup-modal">
+      <p class="followup-eyebrow">A gentle followup</p>
+      <p class="followup-question" id="followup-question"></p>
+      <textarea class="followup-textarea" id="followup-textarea" placeholder="Optional — write as much or as little as you like"></textarea>
+      <div class="followup-actions">
+        <button type="button" class="btn secondary" id="followup-skip">Skip</button>
+        <button type="button" class="btn" id="followup-continue">Continue</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/moods.js"></script>
   <script src="/gratitude.js"></script>
   <script src="/push.js"></script>
@@ -181,6 +193,34 @@
       saveBtn.disabled = !(draft.value.trim() || selectedMood !== null);
     }
 
+    // Reflective followup modal (self-compassion / ACT values prompts)
+    const followupOverlay = document.getElementById('followup-overlay');
+    const followupQuestionEl = document.getElementById('followup-question');
+    const followupTextarea = document.getElementById('followup-textarea');
+    const followupSkip = document.getElementById('followup-skip');
+    const followupContinue = document.getElementById('followup-continue');
+
+    function askFollowup(question) {
+      return new Promise((resolve) => {
+        followupQuestionEl.textContent = question;
+        followupTextarea.value = '';
+        followupOverlay.hidden = false;
+        followupTextarea.focus();
+
+        function done(answer) {
+          followupOverlay.hidden = true;
+          followupSkip.removeEventListener('click', onSkip);
+          followupContinue.removeEventListener('click', onContinue);
+          resolve(answer);
+        }
+        function onSkip() { done(null); }
+        function onContinue() { done(followupTextarea.value.trim() || null); }
+
+        followupSkip.addEventListener('click', onSkip);
+        followupContinue.addEventListener('click', onContinue);
+      });
+    }
+
     saveBtn.addEventListener('click', async () => {
       const text = draft.value.trim();
       if (!text && selectedMood === null) return;
@@ -191,11 +231,31 @@
 
       const gratitudeTag = gratitudeOn ? GRATITUDE_PROMPTS[gratIdx].tag : null;
 
+      let followupId = null;
+      let followupAnswer = null;
+
       try {
+        if (!gratitudeOn) {
+          const csrfToken = await getCsrfToken();
+          const checkRes = await fetch('/api/journal/followup-check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+            body: JSON.stringify({ date }),
+          });
+          const check = await checkRes.json();
+          if (check.show) {
+            followupId = check.id;
+            followupAnswer = await askFollowup(check.question);
+          }
+        }
+
         await fetch('/api/journal/entries', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': await getCsrfToken() },
-          body: JSON.stringify({ date, text: text || null, mood: selectedMood, gratitude: gratitudeOn, gratitudeTag }),
+          body: JSON.stringify({
+            date, text: text || null, mood: selectedMood, gratitude: gratitudeOn, gratitudeTag,
+            followupId, followupAnswer,
+          }),
         });
       } catch (e) {
         console.error('save failed', e);
